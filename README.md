@@ -126,6 +126,43 @@ Encontrou algum problema? Consulte nosso **[Guia de Troubleshooting](TROUBLESHOO
 - ❌ **Football API erro 429**: Limite de requisições excedido, aguarde 1 minuto
 - ❌ **PIX QR Code não gerado**: Verifique se todos os campos obrigatórios estão preenchidos
 
+## 🚀 Deploy no Vercel
+
+### Configuração das Variáveis de Ambiente
+
+Para fazer o deploy no Vercel, você precisa configurar as variáveis de ambiente:
+
+1. **Acesse seu projeto no Vercel**
+   - Vá em https://vercel.com/
+   - Selecione o projeto Hubti
+
+2. **Configure as variáveis**
+   - Clique em **Settings** > **Environment Variables**
+   - Adicione as seguintes variáveis:
+
+   ```bash
+   FOOTBALL_API_KEY=sua_chave_football_aqui
+   MINIMAX_API_KEY=sua_chave_minimax_aqui
+   MINIMAX_GROUP_ID=seu_group_id_minimax_aqui
+   ```
+
+3. **⚠️ IMPORTANTE: GroupId da Minimax**
+   - Obtenha seu GroupId em: https://platform.minimax.io/
+   - Vá em **Console** > **Basic Information**
+   - Copie o **GroupId** e adicione no Vercel
+   - **Sem o GroupId, a API de IA não funcionará!**
+
+4. **Redeploy**
+   - Vá em **Deployments**
+   - Clique nos 3 pontinhos do último deploy
+   - Clique em **Redeploy**
+
+### Deploy Rápido
+
+[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https://github.com/socialbot114-cell/Hubti)
+
+Após o deploy, não esqueça de configurar as variáveis de ambiente!
+
 ## 📁 Estrutura do Projeto
 
 ```
