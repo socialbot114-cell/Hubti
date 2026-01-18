@@ -113,6 +113,19 @@ Este projeto utiliza as seguintes APIs:
 4. **YouTube Downloader** - Implementação customizada
    - Para uso em produção, considere integrar com ytdl-core
 
+## 🔧 Troubleshooting
+
+Encontrou algum problema? Consulte nosso **[Guia de Troubleshooting](TROUBLESHOOTING.md)** com:
+- ✅ Soluções para erros comuns
+- 🐛 Como debugar problemas de API
+- 📝 Logs detalhados e exemplos
+- 🧪 Como testar endpoints diretamente
+
+**Problemas comuns:**
+- ❌ **API de IA não funciona**: Verifique a chave no `.env` e consulte logs do servidor
+- ❌ **Football API erro 429**: Limite de requisições excedido, aguarde 1 minuto
+- ❌ **PIX QR Code não gerado**: Verifique se todos os campos obrigatórios estão preenchidos
+
 ## 📁 Estrutura do Projeto
 
 ```
