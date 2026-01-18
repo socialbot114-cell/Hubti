@@ -109,6 +109,26 @@ curl -X POST "https://api.minimax.io/v1/text/chatcompletion_v2?GroupId=SEU_GROUP
   }'
 ```
 
+### Formato da Resposta de Áudio
+
+A API Minimax retorna áudio em **formato hexadecimal** no campo `data`:
+
+```json
+{
+  "status": 2,
+  "data": "49443303000000000054495432...", // áudio em hex
+  "extra_info": {
+    "audio_length": 1404,
+    "audio_sample_rate": 32000,
+    "audio_size": 24251,
+    "bitrate": 128000,
+    "audio_format": "mp3"
+  }
+}
+```
+
+O código converte automaticamente de hex para base64 para reprodução no navegador.
+
 ### Debug no código:
 
 Os logs detalhados são exibidos no console do servidor Next.js:

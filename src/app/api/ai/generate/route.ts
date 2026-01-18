@@ -170,17 +170,30 @@ export async function POST(request: NextRequest) {
         }
         break
       case 'audio':
-        // Para áudio, pode retornar base64 ou URL
-        result = data.audio_url || data.data?.audio_url || data.audio || ''
-        if (!result && data.data?.audio_base64) {
-          result = `data:audio/mp3;base64,${data.data.audio_base64}`
+        // A API Minimax retorna áudio em hexadecimal no campo 'data'
+        if (data.data) {
+          // Converter hex para base64
+          const hexString = data.data
+          const buffer = Buffer.from(hexString, 'hex')
+          const base64Audio = buffer.toString('base64')
+          result = `data:audio/mp3;base64,${base64Audio}`
+        } else if (data.audio_url) {
+          result = data.audio_url
+        } else if (data.audio) {
+          result = data.audio
         }
+
         if (!result) {
-          console.error('[Minimax API] Nenhuma URL de áudio encontrada:', data)
+          console.error('[Minimax API] Nenhum áudio encontrado na resposta:', data)
+          console.error('[Minimax API] Campos disponíveis:', Object.keys(data))
           return NextResponse.json({
             success: false,
             error: 'Nenhum áudio gerado',
-            debug: data
+            debug: {
+              message: 'Resposta da API não contém áudio',
+              availableFields: Object.keys(data),
+              sampleData: JSON.stringify(data).substring(0, 500)
+            }
           }, { status: 500 })
         }
         break
