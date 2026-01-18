@@ -62,15 +62,18 @@ export default function AIStudio() {
       })
 
       const data = await response.json()
+      console.log('Resposta da API:', data)
 
       if (data.success) {
         setResult(data.result)
       } else {
-        alert('Erro ao gerar conteúdo: ' + data.error)
+        const errorMsg = `Erro ao gerar conteúdo:\n${data.error || 'Erro desconhecido'}\n\nDetalhes: ${JSON.stringify(data.details || {}, null, 2)}`
+        console.error('Erro da API:', data)
+        alert(errorMsg)
       }
     } catch (error) {
       console.error('Erro:', error)
-      alert('Erro ao conectar com a API')
+      alert(`Erro ao conectar com a API: ${error instanceof Error ? error.message : 'Erro desconhecido'}`)
     } finally {
       setLoading(false)
     }
