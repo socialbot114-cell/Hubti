@@ -2,11 +2,32 @@
 
 ## 🤖 API de IA (Minimax)
 
+### ⚠️ IMPORTANTE: GroupId é Obrigatório!
+
+A API Minimax **requer um GroupId** além da chave de API. Sem ele, você receberá erro **404 Not Found**.
+
+#### Como obter seu GroupId:
+
+1. Acesse https://platform.minimax.io/
+2. Faça login na sua conta
+3. Vá em **"Console"** ou **"Basic Information"**
+4. Copie o **GroupId** (geralmente um número longo)
+5. Adicione no arquivo `.env`:
+   ```bash
+   MINIMAX_GROUP_ID=seu_group_id_aqui
+   ```
+6. **Reinicie o servidor** Next.js
+
 ### Problema: Erro ao gerar áudio/imagem/vídeo
 
 #### Verificações básicas:
 
-1. **Verificar chave de API**
+1. **Verificar GroupId (NOVO!)**
+   - ⚠️ O GroupId está configurado no arquivo `.env`?
+   - Sem GroupId = erro 404!
+   - Obtenha em: https://platform.minimax.io/ > Console > Basic Information
+
+2. **Verificar chave de API**
    - A chave está configurada no arquivo `.env`?
    - A chave está válida e ativa no painel Minimax?
    - Formato correto: `sk-api-...`
@@ -23,6 +44,14 @@
 
 ### Erros comuns:
 
+#### `404 Not Found` ⚠️ MAIS COMUM
+- **Causa**: **GroupId não configurado** ou endpoint incorreto
+- **Solução**:
+  1. Verifique se `MINIMAX_GROUP_ID` está no `.env`
+  2. Obtenha o GroupId em https://platform.minimax.io/
+  3. Reinicie o servidor após adicionar
+  4. Veja os logs: deve aparecer mensagem clara sobre GroupId faltando
+
 #### `401 Unauthorized`
 - **Causa**: Chave de API inválida ou expirada
 - **Solução**: Verifique a chave no arquivo `.env` e no painel Minimax
@@ -32,8 +61,8 @@
 - **Solução**: Verifique seu plano no painel Minimax
 
 #### `400 Bad Request`
-- **Causa**: Parâmetros inválidos na requisição
-- **Solução**: Verifique o formato do prompt e parâmetros enviados
+- **Causa**: Parâmetros inválidos na requisição ou GroupId inválido
+- **Solução**: Verifique o formato do prompt, parâmetros e GroupId
 
 #### `500 Internal Server Error`
 - **Causa**: Erro no servidor da API Minimax
@@ -41,14 +70,16 @@
 
 ### Testando a API diretamente:
 
+**⚠️ IMPORTANTE:** Substitua `SEU_GROUP_ID` e `SUA_CHAVE_AQUI` pelos seus valores reais!
+
 ```bash
-# Testar Text-to-Speech (TTS)
-curl -X POST https://api.minimax.io/v1/t2a_v2 \
+# Testar Text-to-Speech (TTS) - COM GroupId!
+curl -X POST "https://api.minimax.io/v1/t2a_v2?GroupId=SEU_GROUP_ID" \
   -H "Authorization: Bearer SUA_CHAVE_AQUI" \
   -H "Content-Type: application/json" \
   -d '{
     "model": "speech-02-hd",
-    "text": "Olá, mundo!",
+    "text": "Bem-vindo ao Brasil",
     "voice_setting": {
       "voice_id": "male-qn-qingse",
       "speed": 1.0,
@@ -62,18 +93,19 @@ curl -X POST https://api.minimax.io/v1/t2a_v2 \
     }
   }'
 
-# Testar Chat Completion (Texto)
-curl -X POST https://api.minimax.io/v1/chat/completions \
+# Testar Chat Completion (Texto) - COM GroupId!
+curl -X POST "https://api.minimax.io/v1/text/chatcompletion_v2?GroupId=SEU_GROUP_ID" \
   -H "Authorization: Bearer SUA_CHAVE_AQUI" \
   -H "Content-Type: application/json" \
   -d '{
-    "model": "abab6.5-chat",
+    "model": "abab6.5s-chat",
     "messages": [
       {
         "role": "user",
         "content": "Olá!"
       }
-    ]
+    ],
+    "tokens_to_generate": 512
   }'
 ```
 

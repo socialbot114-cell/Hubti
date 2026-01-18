@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 
 const MINIMAX_API_KEY = process.env.MINIMAX_API_KEY || 'sk-api-JLi0lsuXeMdydK-sF2HfXLxLp_gixvK4ZJUU81VqRNjlD8ON-XIUjKK__esefyElntMk7x24bBc0Lt209Q79QSadKcpYnOlutHdXPTV-YAp1Liy1140lkJo'
+const MINIMAX_GROUP_ID = process.env.MINIMAX_GROUP_ID || ''
 const MINIMAX_BASE_URL = 'https://api.minimax.io/v1'
 
 export async function POST(request: NextRequest) {
@@ -14,6 +15,31 @@ export async function POST(request: NextRequest) {
       )
     }
 
+    // Verificar GroupId para API Minimax
+    if (!MINIMAX_GROUP_ID) {
+      console.warn('[Minimax API] ⚠️  MINIMAX_GROUP_ID não configurado!')
+      console.warn('[Minimax API] Obtenha seu GroupId em: https://platform.minimax.io/')
+      console.warn('[Minimax API] Adicione MINIMAX_GROUP_ID no arquivo .env')
+
+      return NextResponse.json(
+        {
+          success: false,
+          error: 'GroupId não configurado. Consulte o TROUBLESHOOTING.md',
+          details: {
+            message: 'A API Minimax requer um GroupId para funcionar',
+            howToFix: [
+              '1. Acesse https://platform.minimax.io/',
+              '2. Faça login e vá em "Console" ou "Basic Information"',
+              '3. Copie o GroupId da sua conta',
+              '4. Adicione MINIMAX_GROUP_ID=seu_group_id no arquivo .env',
+              '5. Reinicie o servidor'
+            ]
+          }
+        },
+        { status: 400 }
+      )
+    }
+
     let endpoint = ''
     let requestBody: any = {}
     let headers: any = {
@@ -23,9 +49,9 @@ export async function POST(request: NextRequest) {
 
     switch (type) {
       case 'text':
-        endpoint = `${MINIMAX_BASE_URL}/chat/completions`
+        endpoint = `${MINIMAX_BASE_URL}/text/chatcompletion_v2?GroupId=${MINIMAX_GROUP_ID}`
         requestBody = {
-          model: 'abab6.5-chat',
+          model: 'abab6.5s-chat',
           messages: [
             {
               role: 'user',
@@ -33,21 +59,20 @@ export async function POST(request: NextRequest) {
             }
           ],
           temperature: 0.7,
-          max_tokens: 2000
+          tokens_to_generate: 2000
         }
         break
 
       case 'image':
-        endpoint = `${MINIMAX_BASE_URL}/text_to_image`
+        endpoint = `${MINIMAX_BASE_URL}/text_to_image?GroupId=${MINIMAX_GROUP_ID}`
         requestBody = {
           model: 'text-to-image-01',
-          prompt: prompt,
-          n: 1
+          prompt: prompt
         }
         break
 
       case 'video':
-        endpoint = `${MINIMAX_BASE_URL}/video_generation`
+        endpoint = `${MINIMAX_BASE_URL}/video_generation?GroupId=${MINIMAX_GROUP_ID}`
         requestBody = {
           model: 'video-01',
           prompt: prompt
@@ -55,7 +80,7 @@ export async function POST(request: NextRequest) {
         break
 
       case 'audio':
-        endpoint = `${MINIMAX_BASE_URL}/t2a_v2`
+        endpoint = `${MINIMAX_BASE_URL}/t2a_v2?GroupId=${MINIMAX_GROUP_ID}`
         requestBody = {
           model: 'speech-02-hd',
           text: prompt,
