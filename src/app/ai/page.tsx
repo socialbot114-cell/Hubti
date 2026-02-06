@@ -1,111 +1,92 @@
 'use client'
 
 import { useState } from 'react'
-import { Brain, Image as ImageIcon, Video, Music, FileText, Sparkles, Wand2, Loader2 } from 'lucide-react'
+import { Brain, Image as ImageIcon, Video, Music, FileText, Loader2, ArrowRight, AlertCircle } from 'lucide-react'
+
+type ServiceType = 'text' | 'image' | 'video' | 'audio'
+
+const services: { id: ServiceType; name: string; icon: typeof FileText; description: string }[] = [
+  { id: 'text', name: 'Texto', icon: FileText, description: 'Artigos, conteudo e textos com IA' },
+  { id: 'image', name: 'Imagem', icon: ImageIcon, description: 'Transforme ideias em imagens HD' },
+  { id: 'video', name: 'Video', icon: Video, description: 'Videos profissionais com IA' },
+  { id: 'audio', name: 'Audio', icon: Music, description: 'Sintese de voz em alta qualidade' },
+]
+
+const placeholders: Record<ServiceType, string> = {
+  text: 'Escreva um artigo sobre inteligencia artificial aplicada a negocios...',
+  image: 'Uma paisagem futurista com arranha-ceus de cristal ao por do sol...',
+  video: 'Um video mostrando a evolucao da tecnologia ao longo dos anos...',
+  audio: 'Uma narracao profissional explicando os beneficios da automacao...',
+}
 
 export default function AIStudio() {
-  const [selectedService, setSelectedService] = useState<'text' | 'image' | 'video' | 'audio'>('text')
+  const [selectedService, setSelectedService] = useState<ServiceType>('text')
   const [prompt, setPrompt] = useState('')
   const [result, setResult] = useState<string | null>(null)
   const [loading, setLoading] = useState(false)
-
-  const services = [
-    {
-      id: 'text' as const,
-      name: 'Geração de Texto',
-      icon: FileText,
-      description: 'Crie textos, artigos e conteúdo com IA avançada',
-      color: 'from-blue-500 to-cyan-500'
-    },
-    {
-      id: 'image' as const,
-      name: 'Geração de Imagem',
-      icon: ImageIcon,
-      description: 'Transforme ideias em imagens incríveis',
-      color: 'from-purple-500 to-pink-500'
-    },
-    {
-      id: 'video' as const,
-      name: 'Geração de Vídeo',
-      icon: Video,
-      description: 'Crie vídeos profissionais com IA',
-      color: 'from-orange-500 to-red-500'
-    },
-    {
-      id: 'audio' as const,
-      name: 'Geração de Áudio',
-      icon: Music,
-      description: 'Sintetize voz e crie áudio de alta qualidade',
-      color: 'from-green-500 to-emerald-500'
-    }
-  ]
+  const [error, setError] = useState<string | null>(null)
 
   const handleGenerate = async () => {
-    if (!prompt.trim()) {
-      alert('Por favor, insira um prompt')
-      return
-    }
+    if (!prompt.trim()) return
 
     setLoading(true)
     setResult(null)
+    setError(null)
 
     try {
       const response = await fetch('/api/ai/generate', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          type: selectedService,
-          prompt: prompt,
-        }),
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ type: selectedService, prompt }),
       })
 
       const data = await response.json()
-      console.log('Resposta da API:', data)
+      console.log('[AI Studio] Resposta:', data)
 
       if (data.success) {
         setResult(data.result)
       } else {
-        const errorMsg = `Erro ao gerar conteúdo:\n${data.error || 'Erro desconhecido'}\n\nDetalhes: ${JSON.stringify(data.details || {}, null, 2)}`
-        console.error('Erro da API:', data)
-        alert(errorMsg)
+        const details = data.details
+          ? typeof data.details === 'object'
+            ? JSON.stringify(data.details, null, 2)
+            : String(data.details)
+          : ''
+        setError(`${data.error || 'Erro desconhecido'}${details ? `\n\n${details}` : ''}`)
       }
-    } catch (error) {
-      console.error('Erro:', error)
-      alert(`Erro ao conectar com a API: ${error instanceof Error ? error.message : 'Erro desconhecido'}`)
+    } catch (err) {
+      console.error('[AI Studio] Erro:', err)
+      setError(`Erro ao conectar com a API: ${err instanceof Error ? err.message : 'Erro de rede'}`)
     } finally {
       setLoading(false)
     }
   }
 
   return (
-    <div className="min-h-screen py-12">
-      <div className="container mx-auto px-4">
+    <div className="min-h-screen py-12 md:py-20">
+      <div className="container mx-auto px-4 max-w-4xl">
         {/* Header */}
-        <div className="text-center mb-12">
-          <div className="inline-block mb-4">
-            <span className="bg-gradient-to-r from-yellow-500 via-orange-500 to-red-500 text-white text-sm font-bold px-4 py-2 rounded-full animate-pulse">
-              AAA+++ PREMIUM
+        <div className="mb-12">
+          <div className="flex items-center gap-3 mb-6">
+            <div className="h-px w-8 bg-gradient-to-r from-accent/60 to-transparent" />
+            <span className="text-xs font-semibold tracking-[0.2em] uppercase text-zinc-500">
+              Inteligencia Artificial
+            </span>
+            <span className="text-[10px] font-semibold tracking-widest uppercase text-accent bg-accent/10 px-2 py-0.5 rounded">
+              AAA+++
             </span>
           </div>
 
-          <h1 className="text-4xl md:text-6xl font-bold mb-6 bg-gradient-to-r from-yellow-400 via-orange-400 to-red-400 bg-clip-text text-transparent">
+          <h1 className="text-3xl md:text-5xl font-bold tracking-tight text-white mb-4">
             IA Studio
           </h1>
-
-          <p className="text-xl text-gray-300 mb-4">
-            Powered by <span className="font-bold text-purple-400">Minimax</span>
-          </p>
-
-          <p className="text-gray-400 max-w-2xl mx-auto">
-            Experimente o futuro da criação de conteúdo com nossa plataforma de IA mais avançada.
-            Gere texto, imagens, vídeos e áudio com tecnologia de ponta.
+          <p className="text-zinc-500 text-base max-w-xl">
+            Crie conteudo com os modelos mais avancados da Minimax.
+            Texto, imagens, video e audio em uma unica plataforma.
           </p>
         </div>
 
-        {/* Services Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-12 max-w-6xl mx-auto">
+        {/* Service Selector */}
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-8">
           {services.map((service) => {
             const Icon = service.icon
             const isSelected = selectedService === service.id
@@ -113,150 +94,138 @@ export default function AIStudio() {
             return (
               <button
                 key={service.id}
-                onClick={() => setSelectedService(service.id)}
-                className={`relative p-6 rounded-xl border-2 transition-all duration-300 text-left ${
+                onClick={() => { setSelectedService(service.id); setResult(null); setError(null) }}
+                className={`relative p-4 md:p-5 rounded-xl border text-left transition-all duration-200 ${
                   isSelected
-                    ? 'border-purple-500 bg-gradient-to-br from-slate-800 to-slate-900 scale-105 shadow-lg shadow-purple-500/30'
-                    : 'border-purple-500/20 bg-slate-800/50 hover:border-purple-500/50 hover:scale-102'
+                    ? 'border-white/[0.14] bg-[#12111d]'
+                    : 'border-white/[0.06] bg-[#0c0b16] hover:border-white/[0.10]'
                 }`}
               >
-                {isSelected && (
-                  <div className="absolute -top-2 -right-2">
-                    <Sparkles className="w-6 h-6 text-yellow-400 animate-pulse" />
-                  </div>
-                )}
-
-                <div className={`w-12 h-12 rounded-lg bg-gradient-to-br ${service.color} flex items-center justify-center mb-4`}>
-                  <Icon className="w-6 h-6 text-white" />
+                <div className={`w-9 h-9 rounded-lg border flex items-center justify-center mb-3 transition-all ${
+                  isSelected
+                    ? 'bg-white/[0.08] border-white/[0.12]'
+                    : 'bg-white/[0.03] border-white/[0.06]'
+                }`}>
+                  <Icon className={`w-4 h-4 ${isSelected ? 'text-zinc-200' : 'text-zinc-500'}`} />
                 </div>
-
-                <h3 className="text-lg font-bold text-white mb-2">{service.name}</h3>
-                <p className="text-sm text-gray-400">{service.description}</p>
+                <h3 className={`text-sm font-semibold mb-0.5 ${isSelected ? 'text-white' : 'text-zinc-400'}`}>
+                  {service.name}
+                </h3>
+                <p className="text-[11px] text-zinc-600 hidden md:block">{service.description}</p>
+                {isSelected && (
+                  <div className="absolute bottom-0 left-3 right-3 h-[2px] bg-gradient-to-r from-transparent via-accent/40 to-transparent" />
+                )}
               </button>
             )
           })}
         </div>
 
-        {/* Generator Interface */}
-        <div className="max-w-4xl mx-auto">
-          <div className="bg-gradient-to-br from-slate-800 to-slate-900 rounded-2xl p-8 border border-purple-500/30 shadow-2xl">
-            <div className="flex items-center gap-3 mb-6">
-              <Wand2 className="w-6 h-6 text-purple-400" />
-              <h2 className="text-2xl font-bold text-white">
-                {services.find(s => s.id === selectedService)?.name}
-              </h2>
-            </div>
+        {/* Generator */}
+        <div className="rounded-2xl bg-[#0c0b16] border border-white/[0.06] p-6 md:p-8 mb-6">
+          <label className="block text-xs font-semibold text-zinc-500 uppercase tracking-wider mb-3">
+            Prompt
+          </label>
+          <textarea
+            value={prompt}
+            onChange={(e) => setPrompt(e.target.value)}
+            placeholder={placeholders[selectedService]}
+            rows={4}
+            className="w-full px-4 py-3 bg-white/[0.02] border border-white/[0.06] rounded-xl text-zinc-200 text-sm placeholder-zinc-700 focus:outline-none focus:border-white/[0.14] resize-none transition-colors"
+          />
 
-            <div className="space-y-4">
-              <div>
-                <label className="block text-sm font-semibold text-gray-300 mb-2">
-                  Descreva o que você quer criar:
-                </label>
-                <textarea
-                  value={prompt}
-                  onChange={(e) => setPrompt(e.target.value)}
-                  placeholder={`Exemplo: ${
-                    selectedService === 'text' ? 'Escreva um artigo sobre IA...' :
-                    selectedService === 'image' ? 'Uma paisagem futurista com...' :
-                    selectedService === 'video' ? 'Um vídeo mostrando...' :
-                    'Uma narração profissional sobre...'
-                  }`}
-                  rows={5}
-                  className="w-full px-4 py-3 bg-slate-900/50 border border-purple-500/30 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-purple-500 focus:ring-2 focus:ring-purple-500/20"
-                />
-              </div>
-
-              <button
-                onClick={handleGenerate}
-                disabled={loading || !prompt.trim()}
-                className="w-full px-6 py-4 bg-gradient-to-r from-indigo-500 to-purple-600 text-white font-bold rounded-lg hover:shadow-lg hover:shadow-purple-500/50 transition-all hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100 flex items-center justify-center gap-2"
-              >
-                {loading ? (
-                  <>
-                    <Loader2 className="w-5 h-5 animate-spin" />
-                    Gerando...
-                  </>
-                ) : (
-                  <>
-                    <Sparkles className="w-5 h-5" />
-                    Gerar com IA
-                  </>
-                )}
-              </button>
-            </div>
-
-            {/* Result Display */}
-            {result && (
-              <div className="mt-8 p-6 bg-slate-900/50 rounded-lg border border-purple-500/30">
-                <h3 className="text-lg font-bold text-white mb-4 flex items-center gap-2">
-                  <Sparkles className="w-5 h-5 text-yellow-400" />
-                  Resultado:
-                </h3>
-                <div className="text-gray-300">
-                  {selectedService === 'image' && (
-                    <img src={result} alt="Generated" className="w-full rounded-lg" />
-                  )}
-                  {selectedService === 'video' && (
-                    <video src={result} controls className="w-full rounded-lg" />
-                  )}
-                  {selectedService === 'audio' && (
-                    <audio src={result} controls className="w-full" />
-                  )}
-                  {selectedService === 'text' && (
-                    <div className="whitespace-pre-wrap">{result}</div>
-                  )}
-                </div>
-              </div>
+          <button
+            onClick={handleGenerate}
+            disabled={loading || !prompt.trim()}
+            className="mt-4 w-full group inline-flex items-center justify-center gap-2 px-6 py-3 bg-white text-[#06050e] text-sm font-semibold rounded-lg hover:bg-zinc-200 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+          >
+            {loading ? (
+              <>
+                <Loader2 className="w-4 h-4 animate-spin" />
+                Gerando...
+              </>
+            ) : (
+              <>
+                Gerar com IA
+                <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-0.5 transition-transform" />
+              </>
             )}
-          </div>
+          </button>
+        </div>
 
-          {/* API Info */}
-          <div className="mt-8 bg-slate-800/30 backdrop-blur rounded-xl p-6 border border-purple-500/20">
-            <h3 className="text-lg font-bold text-white mb-4 flex items-center gap-2">
-              <Brain className="w-5 h-5 text-purple-400" />
-              Sobre a tecnologia Minimax
-            </h3>
-            <p className="text-gray-400 mb-4">
-              A Minimax é uma das plataformas de IA mais avançadas do mercado, oferecendo modelos
-              multimodais de última geração para geração de conteúdo. Nossa integração premium
-              garante acesso aos melhores recursos disponíveis.
-            </p>
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-              <div className="text-center">
-                <div className="text-2xl font-bold text-purple-400">4K+</div>
-                <div className="text-xs text-gray-500">Resolução</div>
-              </div>
-              <div className="text-center">
-                <div className="text-2xl font-bold text-purple-400">60fps</div>
-                <div className="text-xs text-gray-500">Vídeos</div>
-              </div>
-              <div className="text-center">
-                <div className="text-2xl font-bold text-purple-400">48kHz</div>
-                <div className="text-xs text-gray-500">Áudio</div>
-              </div>
-              <div className="text-center">
-                <div className="text-2xl font-bold text-purple-400">GPT-4</div>
-                <div className="text-xs text-gray-500">Level</div>
+        {/* Error */}
+        {error && (
+          <div className="rounded-xl bg-red-500/5 border border-red-500/10 p-5 mb-6">
+            <div className="flex items-start gap-3">
+              <AlertCircle className="w-4 h-4 text-red-400 mt-0.5 flex-shrink-0" />
+              <div>
+                <div className="text-sm font-medium text-red-400 mb-1">Erro ao gerar conteudo</div>
+                <pre className="text-xs text-red-400/70 whitespace-pre-wrap font-mono">{error}</pre>
               </div>
             </div>
           </div>
+        )}
 
-          {/* Enterprise CTA */}
-          <div className="mt-8 bg-gradient-to-r from-indigo-900/50 to-purple-900/50 backdrop-blur rounded-xl p-8 border border-purple-500/30 text-center">
-            <h3 className="text-2xl font-bold text-white mb-4">
-              Quer integrar IA no seu negócio?
-            </h3>
-            <p className="text-gray-300 mb-6">
-              Nossa equipe pode implementar soluções customizadas de IA para sua empresa,
-              eliminando toda a complexidade técnica.
-            </p>
-            <a
-              href="#contato"
-              className="inline-block px-8 py-3 bg-gradient-to-r from-indigo-500 to-purple-600 text-white font-bold rounded-lg hover:shadow-lg hover:shadow-purple-500/50 transition-all hover:scale-105"
-            >
-              Fale com nossa equipe
-            </a>
+        {/* Result */}
+        {result && (
+          <div className="rounded-2xl bg-[#0c0b16] border border-white/[0.06] p-6 md:p-8 mb-6">
+            <h3 className="text-xs font-semibold text-zinc-500 uppercase tracking-wider mb-4">Resultado</h3>
+            <div>
+              {selectedService === 'image' && (
+                <img src={result} alt="Imagem gerada" className="w-full rounded-xl" />
+              )}
+              {selectedService === 'video' && (
+                <video src={result} controls className="w-full rounded-xl" />
+              )}
+              {selectedService === 'audio' && (
+                <audio src={result} controls className="w-full" />
+              )}
+              {selectedService === 'text' && (
+                <div className="text-zinc-300 text-sm leading-relaxed whitespace-pre-wrap">{result}</div>
+              )}
+            </div>
           </div>
+        )}
+
+        {/* Tech Info */}
+        <div className="rounded-2xl bg-[#0c0b16] border border-white/[0.06] p-6 md:p-8 mb-6">
+          <div className="flex items-center gap-3 mb-5">
+            <Brain className="w-4 h-4 text-zinc-500" />
+            <h3 className="text-xs font-semibold text-zinc-500 uppercase tracking-wider">Tecnologia</h3>
+          </div>
+          <p className="text-sm text-zinc-500 leading-relaxed mb-6">
+            Integrado com a plataforma Minimax, uma das mais avancadas em IA generativa.
+            Modelos multimodais de ultima geracao para geracao de conteudo profissional.
+          </p>
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+            {[
+              { value: '4K+', label: 'Resolucao' },
+              { value: '60fps', label: 'Videos' },
+              { value: '48kHz', label: 'Audio' },
+              { value: 'GPT-4', label: 'Nivel' },
+            ].map((stat) => (
+              <div key={stat.label}>
+                <div className="text-xl font-bold text-white tracking-tight">{stat.value}</div>
+                <div className="text-[11px] text-zinc-600 uppercase tracking-wide">{stat.label}</div>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* CTA */}
+        <div className="rounded-2xl bg-[#0c0b16] border border-white/[0.06] p-8 text-center">
+          <h3 className="text-xl font-bold text-white mb-3 tracking-tight">
+            Precisa de IA integrada ao seu negocio?
+          </h3>
+          <p className="text-sm text-zinc-500 mb-6 max-w-md mx-auto">
+            Nossa equipe implementa solucoes customizadas de IA para sua empresa.
+          </p>
+          <a
+            href="mailto:contato@hubti.com"
+            className="group inline-flex items-center gap-2 px-6 py-3 bg-white text-[#06050e] text-sm font-semibold rounded-lg hover:bg-zinc-200 transition-colors"
+          >
+            Falar com especialista
+            <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-0.5 transition-transform" />
+          </a>
         </div>
       </div>
     </div>

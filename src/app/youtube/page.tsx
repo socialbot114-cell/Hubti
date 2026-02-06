@@ -1,268 +1,344 @@
 'use client'
 
 import { useState } from 'react'
-import { Youtube, Download, Loader2, AlertCircle, CheckCircle } from 'lucide-react'
+import { Youtube, Download, Loader2, AlertCircle, Check, ArrowRight, ExternalLink } from 'lucide-react'
 
 interface VideoInfo {
   title: string
   thumbnail: string
-  duration: string
+  thumbnailFallback?: string
   author: string
+  authorUrl?: string
+  videoId: string
+}
+
+interface DownloadFormat {
+  quality: string
+  mimeType: string
+  url: string
+}
+
+interface DownloadResult {
+  downloadUrl: string
+  fallback: boolean
+  videoTitle?: string
+  selectedFormat?: { quality: string; mimeType: string }
+  formats?: DownloadFormat[]
+  message?: string
 }
 
 export default function YouTubeDownloader() {
   const [url, setUrl] = useState('')
   const [videoInfo, setVideoInfo] = useState<VideoInfo | null>(null)
-  const [downloadUrl, setDownloadUrl] = useState<string | null>(null)
+  const [downloadResult, setDownloadResult] = useState<DownloadResult | null>(null)
   const [loading, setLoading] = useState(false)
+  const [downloading, setDownloading] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
   const handleGetInfo = async () => {
     if (!url.trim()) {
-      setError('Por favor, insira uma URL do YouTube')
+      setError('Insira uma URL do YouTube')
       return
     }
 
     if (!url.includes('youtube.com') && !url.includes('youtu.be')) {
-      setError('URL inválida. Por favor, insira uma URL válida do YouTube')
+      setError('URL invalida. Use uma URL do YouTube (youtube.com ou youtu.be)')
       return
     }
 
     setLoading(true)
     setError(null)
     setVideoInfo(null)
-    setDownloadUrl(null)
+    setDownloadResult(null)
 
     try {
       const response = await fetch('/api/youtube/info', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ url }),
       })
 
       const data = await response.json()
+      console.log('[YouTube] Info:', data)
 
       if (data.success) {
         setVideoInfo(data.info)
       } else {
-        setError(data.error || 'Erro ao buscar informações do vídeo')
+        setError(data.error || 'Erro ao buscar informacoes do video')
       }
-    } catch (error) {
-      console.error('Erro:', error)
+    } catch (err) {
+      console.error('[YouTube] Erro:', err)
       setError('Erro ao conectar com a API')
     } finally {
       setLoading(false)
     }
   }
 
-  const handleDownload = async () => {
-    setLoading(true)
+  const handleDownload = async (format: string = 'video') => {
+    setDownloading(true)
     setError(null)
 
     try {
       const response = await fetch('/api/youtube/download', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ url }),
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ url, format }),
       })
 
       const data = await response.json()
+      console.log('[YouTube] Download:', data)
 
       if (data.success) {
-        setDownloadUrl(data.downloadUrl)
+        setDownloadResult(data)
       } else {
         setError(data.error || 'Erro ao processar download')
       }
-    } catch (error) {
-      console.error('Erro:', error)
+    } catch (err) {
+      console.error('[YouTube] Erro:', err)
       setError('Erro ao conectar com a API')
     } finally {
-      setLoading(false)
+      setDownloading(false)
+    }
+  }
+
+  const handleThumbnailError = (e: React.SyntheticEvent<HTMLImageElement>) => {
+    const img = e.currentTarget
+    if (videoInfo?.thumbnailFallback && img.src !== videoInfo.thumbnailFallback) {
+      img.src = videoInfo.thumbnailFallback
     }
   }
 
   return (
-    <div className="min-h-screen py-12">
-      <div className="container mx-auto px-4">
+    <div className="min-h-screen py-12 md:py-20">
+      <div className="container mx-auto px-4 max-w-4xl">
         {/* Header */}
-        <div className="text-center mb-12">
-          <h1 className="text-4xl md:text-6xl font-bold mb-6 bg-gradient-to-r from-red-400 to-pink-400 bg-clip-text text-transparent">
-            YouTube Downloader
+        <div className="mb-12">
+          <div className="flex items-center gap-3 mb-6">
+            <div className="h-px w-8 bg-gradient-to-r from-accent/60 to-transparent" />
+            <span className="text-xs font-semibold tracking-[0.2em] uppercase text-zinc-500">
+              Midia Digital
+            </span>
+          </div>
+
+          <h1 className="text-3xl md:text-5xl font-bold tracking-tight text-white mb-4">
+            YouTube Tools
           </h1>
-
-          <p className="text-gray-400 max-w-2xl mx-auto mb-6">
-            Download de vídeos do YouTube de forma rápida e eficiente.
-            Cole a URL do vídeo e baixe em diversos formatos.
+          <p className="text-zinc-500 text-base max-w-xl">
+            Busque informacoes e faca download de videos do YouTube.
+            Cole a URL e obtenha os dados do video em segundos.
           </p>
+        </div>
 
-          <div className="inline-flex items-center gap-2 bg-yellow-500/10 border border-yellow-500/30 rounded-lg px-4 py-2 text-yellow-400 text-sm">
-            <AlertCircle className="w-4 h-4" />
-            <span>Use apenas para conteúdo que você tem direito de baixar</span>
+        {/* Legal notice */}
+        <div className="flex items-center gap-3 rounded-xl bg-white/[0.02] border border-white/[0.06] px-4 py-3 mb-8">
+          <AlertCircle className="w-4 h-4 text-zinc-600 flex-shrink-0" />
+          <span className="text-xs text-zinc-600">Use apenas para conteudo que voce tem direito de baixar</span>
+        </div>
+
+        {/* Search */}
+        <div className="rounded-2xl bg-[#0c0b16] border border-white/[0.06] p-6 md:p-8 mb-6">
+          <label className="block text-xs font-semibold text-zinc-500 uppercase tracking-wider mb-3">
+            URL do YouTube
+          </label>
+          <div className="flex gap-3">
+            <input
+              type="text"
+              value={url}
+              onChange={(e) => setUrl(e.target.value)}
+              placeholder="https://www.youtube.com/watch?v=..."
+              className="flex-1 px-4 py-3 bg-white/[0.02] border border-white/[0.06] rounded-xl text-zinc-200 text-sm placeholder-zinc-700 focus:outline-none focus:border-white/[0.14] transition-colors"
+              onKeyDown={(e) => e.key === 'Enter' && handleGetInfo()}
+            />
+            <button
+              onClick={handleGetInfo}
+              disabled={loading || !url.trim()}
+              className="px-6 py-3 bg-white text-[#06050e] text-sm font-semibold rounded-lg hover:bg-zinc-200 transition-colors disabled:opacity-40 disabled:cursor-not-allowed flex items-center gap-2 flex-shrink-0"
+            >
+              {loading ? (
+                <Loader2 className="w-4 h-4 animate-spin" />
+              ) : (
+                <Youtube className="w-4 h-4" />
+              )}
+              Buscar
+            </button>
           </div>
         </div>
 
-        <div className="max-w-4xl mx-auto">
-          {/* Input Section */}
-          <div className="bg-gradient-to-br from-slate-800 to-slate-900 rounded-2xl p-8 border border-red-500/30 mb-8">
-            <div className="flex items-center gap-3 mb-6">
-              <Youtube className="w-6 h-6 text-red-400" />
-              <h2 className="text-2xl font-bold text-white">Buscar Vídeo</h2>
-            </div>
-
-            <div className="space-y-4">
-              <div>
-                <label className="block text-sm font-semibold text-gray-300 mb-2">
-                  URL do YouTube
-                </label>
-                <input
-                  type="text"
-                  value={url}
-                  onChange={(e) => setUrl(e.target.value)}
-                  placeholder="https://www.youtube.com/watch?v=..."
-                  className="w-full px-4 py-3 bg-slate-900/50 border border-red-500/30 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-red-500 focus:ring-2 focus:ring-red-500/20"
-                  onKeyPress={(e) => e.key === 'Enter' && handleGetInfo()}
-                />
-              </div>
-
-              {error && (
-                <div className="flex items-center gap-2 bg-red-500/10 border border-red-500/30 rounded-lg px-4 py-3 text-red-400">
-                  <AlertCircle className="w-5 h-5 flex-shrink-0" />
-                  <span className="text-sm">{error}</span>
-                </div>
-              )}
-
-              <button
-                onClick={handleGetInfo}
-                disabled={loading || !url.trim()}
-                className="w-full px-6 py-4 bg-gradient-to-r from-red-500 to-pink-600 text-white font-bold rounded-lg hover:shadow-lg hover:shadow-red-500/50 transition-all hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100 flex items-center justify-center gap-2"
-              >
-                {loading ? (
-                  <>
-                    <Loader2 className="w-5 h-5 animate-spin" />
-                    Processando...
-                  </>
-                ) : (
-                  <>
-                    <Youtube className="w-5 h-5" />
-                    Buscar Vídeo
-                  </>
-                )}
-              </button>
+        {/* Error */}
+        {error && (
+          <div className="rounded-xl bg-red-500/5 border border-red-500/10 p-4 mb-6">
+            <div className="flex items-center gap-3">
+              <AlertCircle className="w-4 h-4 text-red-400 flex-shrink-0" />
+              <span className="text-sm text-red-400">{error}</span>
             </div>
           </div>
+        )}
 
-          {/* Video Info */}
-          {videoInfo && (
-            <div className="bg-gradient-to-br from-slate-800 to-slate-900 rounded-2xl p-8 border border-red-500/30 mb-8">
-              <h3 className="text-xl font-bold text-white mb-6">Informações do Vídeo</h3>
+        {/* Video Info */}
+        {videoInfo && (
+          <div className="rounded-2xl bg-[#0c0b16] border border-white/[0.06] p-6 md:p-8 mb-6">
+            <h3 className="text-xs font-semibold text-zinc-500 uppercase tracking-wider mb-5">
+              Informacoes do Video
+            </h3>
 
-              <div className="flex flex-col md:flex-row gap-6">
+            <div className="flex flex-col md:flex-row gap-6">
+              <div className="md:w-72 flex-shrink-0">
                 <img
                   src={videoInfo.thumbnail}
                   alt={videoInfo.title}
-                  className="w-full md:w-64 rounded-lg"
+                  className="w-full rounded-xl bg-white/[0.02]"
+                  onError={handleThumbnailError}
                 />
+              </div>
 
-                <div className="flex-1">
-                  <h4 className="text-lg font-bold text-white mb-3">{videoInfo.title}</h4>
-                  <div className="space-y-2 text-sm text-gray-400">
-                    <p>
-                      <span className="text-gray-500">Canal:</span> {videoInfo.author}
-                    </p>
-                    <p>
-                      <span className="text-gray-500">Duração:</span> {videoInfo.duration}
-                    </p>
-                  </div>
-
-                  <button
-                    onClick={handleDownload}
-                    disabled={loading}
-                    className="mt-6 w-full md:w-auto px-6 py-3 bg-gradient-to-r from-green-500 to-emerald-600 text-white font-bold rounded-lg hover:shadow-lg hover:shadow-green-500/50 transition-all hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100 flex items-center justify-center gap-2"
-                  >
-                    {loading ? (
-                      <>
-                        <Loader2 className="w-5 h-5 animate-spin" />
-                        Preparando...
-                      </>
+              <div className="flex-1 min-w-0">
+                <h4 className="text-lg font-semibold text-white mb-3 tracking-tight">
+                  {videoInfo.title}
+                </h4>
+                <div className="space-y-1.5 mb-6">
+                  <div className="text-sm text-zinc-500">
+                    <span className="text-zinc-600">Canal:</span>{' '}
+                    {videoInfo.authorUrl ? (
+                      <a href={videoInfo.authorUrl} target="_blank" rel="noopener noreferrer" className="text-zinc-400 hover:text-white transition-colors">
+                        {videoInfo.author}
+                      </a>
                     ) : (
-                      <>
-                        <Download className="w-5 h-5" />
-                        Baixar Vídeo
-                      </>
+                      <span className="text-zinc-400">{videoInfo.author}</span>
                     )}
+                  </div>
+                  <div className="text-sm text-zinc-500">
+                    <span className="text-zinc-600">ID:</span>{' '}
+                    <span className="text-zinc-400 font-mono text-xs">{videoInfo.videoId}</span>
+                  </div>
+                </div>
+
+                <div className="flex flex-wrap gap-3">
+                  <button
+                    onClick={() => handleDownload('video')}
+                    disabled={downloading}
+                    className="group inline-flex items-center gap-2 px-5 py-2.5 bg-white text-[#06050e] text-sm font-semibold rounded-lg hover:bg-zinc-200 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+                  >
+                    {downloading ? (
+                      <Loader2 className="w-4 h-4 animate-spin" />
+                    ) : (
+                      <Download className="w-4 h-4" />
+                    )}
+                    Download Video
+                  </button>
+                  <button
+                    onClick={() => handleDownload('audio')}
+                    disabled={downloading}
+                    className="inline-flex items-center gap-2 px-5 py-2.5 text-zinc-400 text-sm font-medium rounded-lg border border-white/[0.08] hover:border-white/[0.14] hover:text-zinc-300 transition-all disabled:opacity-40 disabled:cursor-not-allowed"
+                  >
+                    Download Audio (MP3)
                   </button>
                 </div>
               </div>
             </div>
-          )}
+          </div>
+        )}
 
-          {/* Download Link */}
-          {downloadUrl && (
-            <div className="bg-gradient-to-br from-slate-800 to-slate-900 rounded-2xl p-8 border border-green-500/30 mb-8">
-              <div className="flex items-center gap-2 text-green-400 mb-4">
-                <CheckCircle className="w-6 h-6" />
-                <h3 className="text-xl font-bold">Pronto para Download!</h3>
+        {/* Download Result */}
+        {downloadResult && (
+          <div className="rounded-2xl bg-[#0c0b16] border border-white/[0.06] p-6 md:p-8 mb-6">
+            <div className="flex items-center gap-3 mb-5">
+              <div className="w-8 h-8 rounded-lg bg-green-500/10 border border-green-500/20 flex items-center justify-center">
+                <Check className="w-4 h-4 text-green-400" />
               </div>
-
-              <p className="text-gray-400 mb-6">
-                Seu vídeo está pronto. Clique no botão abaixo para iniciar o download.
-              </p>
-
-              <a
-                href={downloadUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="inline-flex items-center gap-2 px-8 py-4 bg-gradient-to-r from-green-500 to-emerald-600 text-white font-bold rounded-lg hover:shadow-lg hover:shadow-green-500/50 transition-all hover:scale-105"
-              >
-                <Download className="w-5 h-5" />
-                Iniciar Download
-              </a>
+              <div>
+                <h3 className="text-sm font-semibold text-white">
+                  {downloadResult.fallback ? 'Link alternativo disponivel' : 'Download pronto'}
+                </h3>
+                {downloadResult.selectedFormat && (
+                  <p className="text-xs text-zinc-600">
+                    {downloadResult.selectedFormat.quality} &middot; {downloadResult.selectedFormat.mimeType}
+                  </p>
+                )}
+              </div>
             </div>
-          )}
 
-          {/* Features */}
-          <div className="bg-slate-800/30 backdrop-blur rounded-xl p-6 border border-red-500/20">
-            <h3 className="text-lg font-bold text-white mb-4">Recursos</h3>
-            <ul className="space-y-2 text-gray-400 text-sm">
-              <li className="flex items-start gap-2">
-                <CheckCircle className="w-4 h-4 text-green-400 mt-1 flex-shrink-0" />
-                <span>Download rápido e sem limite de tamanho</span>
-              </li>
-              <li className="flex items-start gap-2">
-                <CheckCircle className="w-4 h-4 text-green-400 mt-1 flex-shrink-0" />
-                <span>Suporte a vídeos em alta qualidade (HD, Full HD, 4K)</span>
-              </li>
-              <li className="flex items-start gap-2">
-                <CheckCircle className="w-4 h-4 text-green-400 mt-1 flex-shrink-0" />
-                <span>Opção de baixar apenas áudio (MP3)</span>
-              </li>
-              <li className="flex items-start gap-2">
-                <CheckCircle className="w-4 h-4 text-green-400 mt-1 flex-shrink-0" />
-                <span>Sem necessidade de registro</span>
-              </li>
-            </ul>
-          </div>
+            {downloadResult.fallback && downloadResult.message && (
+              <p className="text-xs text-zinc-500 mb-4 p-3 rounded-lg bg-white/[0.02] border border-white/[0.04]">
+                {downloadResult.message}
+              </p>
+            )}
 
-          {/* Enterprise CTA */}
-          <div className="mt-8 bg-gradient-to-r from-red-900/50 to-pink-900/50 backdrop-blur rounded-xl p-8 border border-red-500/30 text-center">
-            <h3 className="text-2xl font-bold text-white mb-4">
-              Precisa de soluções de processamento de mídia?
-            </h3>
-            <p className="text-gray-300 mb-6">
-              Oferecemos serviços de processamento de vídeo, conversão de formatos,
-              streaming e integrações com plataformas de vídeo.
-            </p>
             <a
-              href="#contato"
-              className="inline-block px-8 py-3 bg-gradient-to-r from-red-500 to-pink-600 text-white font-bold rounded-lg hover:shadow-lg hover:shadow-red-500/50 transition-all hover:scale-105"
+              href={downloadResult.downloadUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="group inline-flex items-center gap-2 px-6 py-3 bg-white text-[#06050e] text-sm font-semibold rounded-lg hover:bg-zinc-200 transition-colors"
             >
-              Fale com nossa equipe
+              <Download className="w-4 h-4" />
+              {downloadResult.fallback ? 'Abrir no YouTube' : 'Iniciar Download'}
+              <ExternalLink className="w-3 h-3 opacity-50" />
             </a>
+
+            {/* Other formats */}
+            {downloadResult.formats && downloadResult.formats.length > 1 && (
+              <div className="mt-6 pt-6 border-t border-white/[0.04]">
+                <h4 className="text-xs font-semibold text-zinc-500 uppercase tracking-wider mb-3">
+                  Outros formatos disponiveis
+                </h4>
+                <div className="space-y-2">
+                  {downloadResult.formats.slice(1).map((fmt, i) => (
+                    <a
+                      key={i}
+                      href={fmt.url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="flex items-center justify-between p-3 rounded-lg bg-white/[0.02] border border-white/[0.04] hover:border-white/[0.08] transition-colors group"
+                    >
+                      <div className="flex items-center gap-3">
+                        <span className="text-sm text-zinc-400">{fmt.quality}</span>
+                        <span className="text-xs text-zinc-600">{fmt.mimeType}</span>
+                      </div>
+                      <Download className="w-3.5 h-3.5 text-zinc-600 group-hover:text-zinc-400 transition-colors" />
+                    </a>
+                  ))}
+                </div>
+              </div>
+            )}
           </div>
+        )}
+
+        {/* Features */}
+        <div className="rounded-2xl bg-[#0c0b16] border border-white/[0.06] p-6 md:p-8 mb-6">
+          <h3 className="text-xs font-semibold text-zinc-500 uppercase tracking-wider mb-5">Recursos</h3>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            {[
+              'Download em multiplas qualidades',
+              'Suporte a HD, Full HD e 4K',
+              'Extracao de audio (MP3)',
+              'Informacoes reais do video via oEmbed',
+              'Processamento server-side seguro',
+              'Sem necessidade de registro',
+            ].map((feature) => (
+              <div key={feature} className="flex items-center gap-2.5 text-sm text-zinc-400">
+                <div className="w-5 h-5 rounded-md bg-white/[0.03] border border-white/[0.06] flex items-center justify-center flex-shrink-0">
+                  <Check className="w-3 h-3 text-zinc-500" />
+                </div>
+                {feature}
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* CTA */}
+        <div className="rounded-2xl bg-[#0c0b16] border border-white/[0.06] p-8 text-center">
+          <h3 className="text-xl font-bold text-white mb-3 tracking-tight">
+            Precisa de processamento de midia em escala?
+          </h3>
+          <p className="text-sm text-zinc-500 mb-6 max-w-md mx-auto">
+            Oferecemos servicos de processamento de video, conversao de formatos e integracoes com plataformas de streaming.
+          </p>
+          <a
+            href="mailto:contato@hubti.com"
+            className="group inline-flex items-center gap-2 px-6 py-3 bg-white text-[#06050e] text-sm font-semibold rounded-lg hover:bg-zinc-200 transition-colors"
+          >
+            Falar com especialista
+            <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-0.5 transition-transform" />
+          </a>
         </div>
       </div>
     </div>
