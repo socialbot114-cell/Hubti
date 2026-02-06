@@ -141,7 +141,7 @@ export default function AIStudio() {
             {loading ? (
               <>
                 <Loader2 className="w-4 h-4 animate-spin" />
-                Gerando...
+                {selectedService === 'video' ? 'Gerando video (pode levar ate 3 min)...' : 'Gerando...'}
               </>
             ) : (
               <>
