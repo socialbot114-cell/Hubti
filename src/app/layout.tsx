@@ -4,9 +4,9 @@ import Header from '@/components/Header'
 import Footer from '@/components/Footer'
 
 export const metadata: Metadata = {
-  title: 'HUBTI - Portal de APIs e Automacoes',
-  description: 'Portal de APIs da HUBTI - Empresa focada em automacoes, IA e integracoes de alta qualidade. Oferecemos servicos de integracao para eliminar friccoes na adocao de novas tecnologias.',
-  keywords: ['APIs', 'Automacao', 'IA', 'Integracoes', 'HUBTI', 'PIX', 'Minimax', 'Football API'],
+  title: 'HUBTI - Infraestrutura de APIs para Empresas',
+  description: 'Plataforma empresarial de APIs, automacao e inteligencia artificial. Integracoes de alta performance para empresas modernas.',
+  keywords: ['APIs', 'Automacao', 'IA', 'Integracoes', 'HUBTI', 'PIX', 'Enterprise', 'Platform'],
 }
 
 export default function RootLayout({
@@ -16,9 +16,9 @@ export default function RootLayout({
 }) {
   return (
     <html lang="pt-BR">
-      <body className="min-h-screen bg-[#080614] text-white font-sans">
+      <body className="min-h-screen bg-[#06050e] text-zinc-300 font-sans antialiased">
         <Header />
-        <main className="min-h-screen pt-16">
+        <main className="min-h-screen pt-14">
           {children}
         </main>
         <Footer />

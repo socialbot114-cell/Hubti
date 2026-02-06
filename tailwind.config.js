@@ -8,24 +8,20 @@ module.exports = {
   theme: {
     extend: {
       colors: {
-        'hubti-primary': '#6366f1',
-        'hubti-secondary': '#8b5cf6',
-        'hubti-accent': '#ec4899',
-        'hubti-dark': '#1e1b4b',
-        'hubti-bg': '#080614',
-      },
-      backgroundImage: {
-        'gradient-radial': 'radial-gradient(var(--tw-gradient-stops))',
-        'gradient-conic': 'conic-gradient(from 180deg at 50% 50%, var(--tw-gradient-stops))',
-      },
-      animation: {
-        'float': 'float 6s ease-in-out infinite',
-        'float-delayed': 'float 6s ease-in-out infinite 2s',
-        'float-slow': 'float 8s ease-in-out infinite 1s',
-        'glow-pulse': 'glow-pulse 4s ease-in-out infinite',
-        'fade-in-up': 'fade-in-up 0.6s ease-out forwards',
-        'modal-overlay': 'modal-overlay-in 0.2s ease-out',
-        'modal-enter': 'modal-enter 0.35s cubic-bezier(0.16, 1, 0.3, 1)',
+        surface: {
+          DEFAULT: '#06050e',
+          raised: '#0c0b16',
+          overlay: '#12111d',
+        },
+        border: {
+          DEFAULT: 'rgba(255, 255, 255, 0.06)',
+          hover: 'rgba(255, 255, 255, 0.10)',
+          active: 'rgba(255, 255, 255, 0.14)',
+        },
+        accent: {
+          DEFAULT: '#8b5cf6',
+          muted: 'rgba(139, 92, 246, 0.12)',
+        },
       },
     },
   },
