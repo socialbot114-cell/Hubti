@@ -1,15 +1,12 @@
 import type { Metadata } from 'next'
-import { Inter } from 'next/font/google'
 import './globals.css'
 import Header from '@/components/Header'
 import Footer from '@/components/Footer'
 
-const inter = Inter({ subsets: ['latin'] })
-
 export const metadata: Metadata = {
-  title: 'HUBTI - Portal de APIs e Automações',
-  description: 'Portal de APIs da HUBTI - Empresa focada em automações, IA e integrações de alta qualidade. Oferecemos serviços de integração para eliminar fricções na adoção de novas tecnologias.',
-  keywords: ['APIs', 'Automação', 'IA', 'Integrações', 'HUBTI', 'PIX', 'Minimax', 'Football API'],
+  title: 'HUBTI - Portal de APIs e Automacoes',
+  description: 'Portal de APIs da HUBTI - Empresa focada em automacoes, IA e integracoes de alta qualidade. Oferecemos servicos de integracao para eliminar friccoes na adocao de novas tecnologias.',
+  keywords: ['APIs', 'Automacao', 'IA', 'Integracoes', 'HUBTI', 'PIX', 'Minimax', 'Football API'],
 }
 
 export default function RootLayout({
@@ -19,9 +16,9 @@ export default function RootLayout({
 }) {
   return (
     <html lang="pt-BR">
-      <body className={`${inter.className} min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900`}>
+      <body className="min-h-screen bg-[#080614] text-white font-sans">
         <Header />
-        <main className="min-h-screen">
+        <main className="min-h-screen pt-16">
           {children}
         </main>
         <Footer />
