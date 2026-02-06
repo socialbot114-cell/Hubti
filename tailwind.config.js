@@ -8,14 +8,20 @@ module.exports = {
   theme: {
     extend: {
       colors: {
-        'hubti-primary': '#6366f1',
-        'hubti-secondary': '#8b5cf6',
-        'hubti-accent': '#ec4899',
-        'hubti-dark': '#1e1b4b',
-      },
-      backgroundImage: {
-        'gradient-radial': 'radial-gradient(var(--tw-gradient-stops))',
-        'gradient-conic': 'conic-gradient(from 180deg at 50% 50%, var(--tw-gradient-stops))',
+        surface: {
+          DEFAULT: '#06050e',
+          raised: '#0c0b16',
+          overlay: '#12111d',
+        },
+        border: {
+          DEFAULT: 'rgba(255, 255, 255, 0.06)',
+          hover: 'rgba(255, 255, 255, 0.10)',
+          active: 'rgba(255, 255, 255, 0.14)',
+        },
+        accent: {
+          DEFAULT: '#8b5cf6',
+          muted: 'rgba(139, 92, 246, 0.12)',
+        },
       },
     },
   },

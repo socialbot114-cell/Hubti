@@ -2,68 +2,83 @@
 @tailwind components;
 @tailwind utilities;
 
-:root {
-  --foreground-rgb: 0, 0, 0;
-  --background-start-rgb: 214, 219, 220;
-  --background-end-rgb: 255, 255, 255;
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --foreground-rgb: 255, 255, 255;
-    --background-start-rgb: 0, 0, 0;
-    --background-end-rgb: 0, 0, 0;
-  }
+* {
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
 body {
-  color: rgb(var(--foreground-rgb));
-  background: linear-gradient(
-      to bottom,
-      transparent,
-      rgb(var(--background-end-rgb))
-    )
-    rgb(var(--background-start-rgb));
+  color: #e4e4e7;
+  background: #06050e;
 }
 
-@layer utilities {
-  .text-balance {
-    text-wrap: balance;
-  }
+::selection {
+  background: rgba(139, 92, 246, 0.3);
+  color: #fff;
 }
 
-/* Custom scrollbar */
+/* Scrollbar */
 ::-webkit-scrollbar {
-  width: 10px;
+  width: 6px;
 }
 
 ::-webkit-scrollbar-track {
-  background: #1e1b4b;
+  background: transparent;
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #6366f1;
-  border-radius: 5px;
+  background: rgba(255, 255, 255, 0.08);
+  border-radius: 3px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: #8b5cf6;
+  background: rgba(255, 255, 255, 0.14);
 }
 
-/* Animações customizadas */
-@keyframes gradient {
-  0% {
-    background-position: 0% 50%;
+/* Modal */
+@keyframes overlay-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes modal-slide-up {
+  from {
+    opacity: 0;
+    transform: translateY(16px) scale(0.98);
   }
-  50% {
-    background-position: 100% 50%;
-  }
-  100% {
-    background-position: 0% 50%;
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
   }
 }
 
-.animate-gradient {
-  background-size: 200% 200%;
-  animation: gradient 15s ease infinite;
+.animate-overlay-in {
+  animation: overlay-in 0.15s ease-out;
+}
+
+.animate-modal-slide-up {
+  animation: modal-slide-up 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* Subtle shimmer for hero line */
+@keyframes shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+
+.animate-shimmer {
+  background-size: 200% 100%;
+  animation: shimmer 8s linear infinite;
+}
+
+/* Divider line glow */
+.line-glow {
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(139, 92, 246, 0.15),
+    rgba(99, 102, 241, 0.25),
+    rgba(139, 92, 246, 0.15),
+    transparent
+  );
 }

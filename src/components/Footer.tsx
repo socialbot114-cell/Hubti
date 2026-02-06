@@ -1,59 +1,68 @@
-import { Github, Mail, Globe } from 'lucide-react'
+import Link from 'next/link'
 
 export default function Footer() {
   return (
-    <footer className="bg-slate-900/80 backdrop-blur-lg border-t border-purple-500/20 mt-20">
-      <div className="container mx-auto px-4 py-12">
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-          {/* Sobre a HUBTI */}
-          <div>
-            <h3 className="text-xl font-bold bg-gradient-to-r from-indigo-400 to-purple-400 bg-clip-text text-transparent mb-4">
-              HUBTI
-            </h3>
-            <p className="text-gray-400 text-sm leading-relaxed">
-              Empresa focada em automações, IA e APIs de alta qualidade.
-              Oferecemos serviços de integração para eliminar fricções na adoção de novas tecnologias.
+    <footer className="border-t border-white/[0.04] mt-8">
+      <div className="container mx-auto px-4 max-w-5xl py-12 md:py-16">
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-8 md:gap-12 mb-12">
+          {/* Brand */}
+          <div className="col-span-2 md:col-span-1">
+            <div className="text-base font-bold text-white tracking-tight mb-3">HUBTI</div>
+            <p className="text-sm text-zinc-600 leading-relaxed max-w-[200px]">
+              Infraestrutura de APIs para empresas modernas.
             </p>
           </div>
 
-          {/* Serviços */}
+          {/* Servicos */}
           <div>
-            <h3 className="text-lg font-semibold text-white mb-4">Nossos Serviços</h3>
-            <ul className="space-y-2 text-sm text-gray-400">
-              <li>• Integrações de APIs Customizadas</li>
-              <li>• Automações Inteligentes</li>
-              <li>• Soluções em IA (AAA+++)</li>
-              <li>• Geração de PIX QR Code (AA++)</li>
-              <li>• Consultoria Técnica</li>
+            <h3 className="text-xs font-semibold text-zinc-500 uppercase tracking-wider mb-4">Servicos</h3>
+            <ul className="space-y-2.5">
+              {[
+                { label: 'IA Studio', href: '/ai' },
+                { label: 'PIX QR Code', href: '/pix' },
+                { label: 'Football API', href: '/football' },
+                { label: 'Transporte', href: '/transport' },
+                { label: 'YouTube Tools', href: '/youtube' },
+              ].map((item) => (
+                <li key={item.href}>
+                  <Link href={item.href} className="text-sm text-zinc-600 hover:text-zinc-300 transition-colors">
+                    {item.label}
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          </div>
+
+          {/* Empresa */}
+          <div>
+            <h3 className="text-xs font-semibold text-zinc-500 uppercase tracking-wider mb-4">Empresa</h3>
+            <ul className="space-y-2.5">
+              <li><span className="text-sm text-zinc-600">Integracoes customizadas</span></li>
+              <li><span className="text-sm text-zinc-600">Automacoes inteligentes</span></li>
+              <li><span className="text-sm text-zinc-600">Consultoria tecnica</span></li>
             </ul>
           </div>
 
           {/* Contato */}
           <div>
-            <h3 className="text-lg font-semibold text-white mb-4">Contato</h3>
-            <div className="space-y-3">
-              <a href="mailto:contato@hubti.com" className="flex items-center gap-2 text-gray-400 hover:text-purple-400 transition-colors">
-                <Mail size={18} />
-                <span className="text-sm">contato@hubti.com</span>
-              </a>
-              <a href="#" className="flex items-center gap-2 text-gray-400 hover:text-purple-400 transition-colors">
-                <Globe size={18} />
-                <span className="text-sm">www.hubti.com</span>
-              </a>
-              <a href="#" className="flex items-center gap-2 text-gray-400 hover:text-purple-400 transition-colors">
-                <Github size={18} />
-                <span className="text-sm">github.com/hubti</span>
-              </a>
-            </div>
+            <h3 className="text-xs font-semibold text-zinc-500 uppercase tracking-wider mb-4">Contato</h3>
+            <ul className="space-y-2.5">
+              <li>
+                <a href="mailto:contato@hubti.com" className="text-sm text-zinc-600 hover:text-zinc-300 transition-colors">
+                  contato@hubti.com
+                </a>
+              </li>
+              <li><span className="text-sm text-zinc-600">www.hubti.com</span></li>
+            </ul>
           </div>
         </div>
 
-        <div className="border-t border-purple-500/20 mt-8 pt-8 text-center">
-          <p className="text-gray-500 text-sm">
+        <div className="border-t border-white/[0.04] pt-8 flex flex-col sm:flex-row items-center justify-between gap-4">
+          <p className="text-xs text-zinc-700">
             &copy; {new Date().getFullYear()} HUBTI. Todos os direitos reservados.
           </p>
-          <p className="text-gray-600 text-xs mt-2">
-            Simplificando a adoção de tecnologia através de integrações de alta qualidade
+          <p className="text-xs text-zinc-800">
+            Sao Paulo, Brasil
           </p>
         </div>
       </div>
